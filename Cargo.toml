@@ -1,0 +1,23 @@
+[package]
+name = "nmea"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jake Johnson"]
+categories = ["no-std"]
+
+[lib]
+name = "nmea"
+
+[dependencies]
+fixed-queue = "0.5.1"
+err-derive = { version = "0.3", default-features = false, features = [] }
+num-integer = { version = "0.1.36", default-features = false }
+pyo3 = { version = "0.20", optional = true, features = ["extension-module"] }
+
+[features]
+# std required for pyo3 bindings.
+pyo3 = ["dep:pyo3"]
+
+[package.metadata.pyo3]
+# "cdylib" is necessary to produce a shared library for Python to import from.
+crate-type = ["cdylib"]

@@ -1,0 +1,4 @@
+{
+  "rust-analyzer.cargo.features": ["pyo3"],
+  "rust-analyzer.check.features": ["pyo3"]
+}
