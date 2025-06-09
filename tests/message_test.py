@@ -1,7 +1,10 @@
+import math
+import random
+
 import pytest
 from assertpy import assert_that
-
 from nmea import Message as NmeaMessage
+
 
 def test_rx():
     msg = NmeaMessage()
@@ -101,3 +104,32 @@ def test_tx():
     assert_that(msg.pop_frame()).is_equal_to(buf_2)
     assert_that(msg.pop_frame()).is_equal_to(buf_3)
     assert_that(msg.pop_frame()).is_equal_to(buf_4)
+
+
+def test_fuzzing():
+    # TODO: Add different ranges of sizes that include lengths under 6.
+    for _ in range(100):
+        # Generate random payload length between 1 and 100 bytes
+        payload_length = random.randint(1, 100)
+        original_payload = bytes(random.randint(0, 255) for _ in range(payload_length))
+
+        # Number of total NMEA frames.
+        num_chunks = math.ceil(len(original_payload) / 8)
+        print(num_chunks)
+
+        msg_encode = NmeaMessage.from_payload(original_payload, 0)
+        msg_decode = NmeaMessage()
+
+        # for i in range(num_chunks):
+        while True:
+            # Pop frames for sending TX over CAN bus.
+            frame = msg_encode.pop_frame()
+            if frame is None:
+                break
+
+            # Receive frames in 8-byte chunks over CAN bus.
+            b = msg_decode.add_frame(frame)
+
+        buf = msg_decode.get_payload()
+
+        assert_that(buf).is_equal_to(original_payload)

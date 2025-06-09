@@ -97,6 +97,11 @@ impl Message {
     pub fn from_payload(payload: &[u8], sequence_counter: u8) -> Self {
         let mut queue = VecDeque::new();
         if payload.len() <= 6 {
+            let mut padded_payload: [u8; 6] = [0xFF; 6];
+            padded_payload[..payload.len()].copy_from_slice(payload);
+            let first_frame =
+                Frame::first_frame(&padded_payload, payload.len() as u8, sequence_counter);
+            let _ = queue.push_back(first_frame);
             // We can contain in a single frame.
             return Self {
                 queue,
@@ -137,12 +142,12 @@ impl Message {
 
         // Process last consecutive frame if not frame aligned.
         if remaining_bytes > 0 {
-            let mut buf: [u8; 7] = [0xFF; 7];
-            // buf[..remaining_bytes] = payload[6 + (num_chunks as usize)*7..];
+            let mut padded_payload: [u8; 7] = [0xFF; 7];
             for i in 0..remaining_bytes {
-                buf[i as usize] = payload[6 + (num_chunks as usize) * 7 + (i as usize)];
+                padded_payload[i as usize] = payload[6 + (num_chunks as usize) * 7 + (i as usize)];
             }
-            let last_frame = Frame::consecutive_frame(&buf, sequence_counter, frame_counter);
+            let last_frame =
+                Frame::consecutive_frame(&padded_payload, sequence_counter, frame_counter);
             let _ = match last_frame {
                 Ok(f) => queue.push_back(f),
                 Err(_e) => panic!("Error creating last consecutive frame"),
