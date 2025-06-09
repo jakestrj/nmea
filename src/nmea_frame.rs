@@ -6,6 +6,23 @@ pub enum Error {
     InvalidParameter,
 }
 
+/// Represents a single CAN frame in an NMEA2000 Fast-Packet message sequence.
+///
+/// NMEA2000 messages are split across multiple CAN frames. Each frame contains:
+///
+/// ## Example (from split into 4 CAN frames, each canonical CAN frame is 8-bytes):
+///
+/// E0 17 A3 99 04 80 05 02 : First frame
+/// E1 00 01 00 00 00 07 00 : Consecutive frame
+/// E2 00 00 D0 84 00 00 5E : Consecutive frame
+/// E3 12 00 00 FF FF FF FF : Consecutive frame
+///
+/// - `E0..E3`: Sequence identifier (E) and frame counter (0..3).
+/// - `17`: Total effective data bytes.
+/// - 0xFF: Trailing padding bytes.
+///
+/// The maximum data length is 223 effective data bytes (6 bytes in the first frame,
+/// 7 bytes in each consecutive frame).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Frame {
     pub bytes: [u8; 8],
