@@ -1,22 +1,5 @@
 use err_derive::Error;
 
-#[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Kind {
-    Single,
-    First,
-    Consecutive,
-    Flow,
-}
-
-#[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum FlowKind {
-    Continue,
-    Wait,
-    Abort,
-}
-
 #[derive(Debug, Error)]
 pub enum Error {
     #[error(display = "Invalid input parameter")]

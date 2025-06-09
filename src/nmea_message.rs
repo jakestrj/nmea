@@ -127,7 +127,7 @@ impl Message {
         let mut frame_counter: u8 = 1; // First frame is already processed.
         for i in 0..num_chunks {
             let frame = Frame::consecutive_frame(
-                &payload[6 + (i as usize) * 7..6 + (i as usize) * 7 + 7]
+                &payload[(6 + 7 * (i as usize))..(6 + 7 * (i as usize) + 7)]
                     .try_into()
                     .unwrap(),
                 sequence_counter,
@@ -143,9 +143,10 @@ impl Message {
         // Process last consecutive frame if not frame aligned.
         if remaining_bytes > 0 {
             let mut padded_payload: [u8; 7] = [0xFF; 7];
-            for i in 0..remaining_bytes {
-                padded_payload[i as usize] = payload[6 + (num_chunks as usize) * 7 + (i as usize)];
-            }
+            padded_payload[..remaining_bytes as usize].copy_from_slice(
+                &payload[6 + (num_chunks as usize) * 7
+                    ..6 + (num_chunks as usize) * 7 + remaining_bytes as usize],
+            );
             let last_frame =
                 Frame::consecutive_frame(&padded_payload, sequence_counter, frame_counter);
             let _ = match last_frame {
@@ -241,5 +242,45 @@ mod tests {
         assert_eq!(msg.pop_frame().unwrap().bytes, buf_2);
         assert_eq!(msg.pop_frame().unwrap().bytes, buf_3);
         assert_eq!(msg.pop_frame().unwrap().bytes, buf_4);
+    }
+
+    fn test_for_payload_size(payload_length: usize) {
+        let mut original_payload = [0u8; MAX_NMEA_PACKET_SIZE];
+        rand::fill(&mut original_payload[..payload_length]);
+
+        // Create message for encoding
+        let mut msg_encode = Message::from_payload(&original_payload[..payload_length], 0);
+        let mut msg_decode = Message::new();
+
+        // Process all frames
+        while let Some(frame) = msg_encode.pop_frame() {
+            let _ = msg_decode.add_frame(&frame.bytes);
+        }
+
+        // Get decoded payload
+        let mut decoded_payload = [0xFF; MAX_NMEA_PACKET_SIZE];
+        let decoded_len = msg_decode.get_payload(&mut decoded_payload);
+
+        // Compare original and decoded payloads
+        assert_eq!(
+            &decoded_payload[..decoded_len],
+            &original_payload[..payload_length]
+        );
+    }
+
+    #[test]
+    fn test_fuzzing() {
+        // Test up to 6-byte payload size which can be fit into a single chunk.
+        for payload_length in 0..6 {
+            // Generate random payload length between 1 and 100 bytess
+            test_for_payload_size(payload_length);
+        }
+
+        // Test for variable lengths.
+        for payload_length in 6..=200 {
+            test_for_payload_size(payload_length);
+        }
+
+        test_for_payload_size(216);
     }
 }
