@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn test_first_frame() {
-        let mut first_frame: [u8; 8] = [0x00, 0x1B, 0x12, 0x7C, 0xEA, 0xD5, 0x12, 0x3D];
+        let first_frame: [u8; 8] = [0x00, 0x1B, 0x12, 0x7C, 0xEA, 0xD5, 0x12, 0x3D];
         let test_frame = Frame::from_bytes(&first_frame);
         assert_eq!(test_frame.sequence_counter(), 0);
         assert_eq!(test_frame.frame_counter(), 0);
@@ -123,7 +123,7 @@ mod tests {
     fn test_consecutive_frame() {
         let frame_counter = 3;
         let sequence_counter = 1;
-        let mut payload: [u8; 7] = [0x20, 0xFF, 0xFF, 0x00, 0x70, 0xFE, 0xFF];
+        let payload: [u8; 7] = [0x20, 0xFF, 0xFF, 0x00, 0x70, 0xFE, 0xFF];
         let test_frame: Frame =
             Frame::consecutive_frame(&payload, sequence_counter, frame_counter).unwrap();
         assert_eq!(test_frame.sequence_counter(), 1);

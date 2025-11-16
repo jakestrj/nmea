@@ -73,7 +73,7 @@ impl Message {
             }
             self.sequence_counter = frame.sequence_counter();
             self.data_len = frame.data_len().unwrap();
-            self.queue.push_back(frame);
+            let _ = self.queue.push_back(frame);
             self.cur_frame_counter = 0;
         } else {
             if self.sequence_counter != frame.sequence_counter() {
@@ -84,10 +84,10 @@ impl Message {
             }
             let frame_counter = frame.frame_counter();
             if frame_counter >= self.num_frames - 1 {
-                self.queue.push_back(frame);
+                let _ = self.queue.push_back(frame);
                 return Ok(true);
             } else {
-                self.queue.push_back(frame);
+                let _ = self.queue.push_back(frame);
             }
             self.cur_frame_counter = frame_counter;
         }
