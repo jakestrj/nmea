@@ -10,7 +10,7 @@ name = "nmea"
 
 [dependencies]
 fixed-queue = "0.5.1"
-err-derive = { version = "0.3", default-features = false, features = [] }
+thiserror-no-std = { version = "2.0.2", default-features = false, features = [] }
 num-integer = { version = "0.1.36", default-features = false }
 pyo3 = { version = "0.20", optional = true, features = ["extension-module"] }
 

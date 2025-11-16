@@ -1,7 +1,7 @@
 use crate::nmea_frame::Frame;
 use core::result::Result;
 use core::result::Result::Err;
-use err_derive::Error;
+use thiserror_no_std::Error;
 use fixed_queue::VecDeque;
 
 pub const MAX_NMEA_PACKET_SIZE: usize = 223;
@@ -21,15 +21,15 @@ enum TransmissionType {
 
 #[derive(Debug, Error, PartialEq)]
 pub enum Error {
-    #[error(display = "Message queue is empty")]
+    #[error("Message queue is empty")]
     EmptyQueue,
-    #[error(display = "Queue is already full")]
+    #[error("Queue is already full")]
     FullQueue,
-    #[error(display = "Wrong transmission type")]
+    #[error("Wrong transmission type")]
     TransmissionTypeMismatch,
-    #[error(display = "Wrong sequence counter")]
+    #[error("Wrong sequence counter")]
     SequenceCountError,
-    #[error(display = "Frame is out of sequence")]
+    #[error("Frame is out of sequence")]
     SequenceMismatch,
 }
 

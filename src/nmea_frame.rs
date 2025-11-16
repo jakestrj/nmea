@@ -1,8 +1,8 @@
-use err_derive::Error;
+use thiserror_no_std::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error(display = "Invalid input parameter")]
+    #[error("Invalid input parameter")]
     InvalidParameter,
 }
 
